@@ -1,0 +1,29 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": true,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": false,
+    "target": "ESNext",
+    "module": "esnext",
+    "lib": ["es2021", "dom"],
+    "jsx": "preserve",
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
+    "outDir": "../../dist/out-tsc",
+    "types": ["vue-i18n", "node"]
+  },
+  "exclude": ["**/*.spec.ts", "node_modules", "tmp"],
+  "include": ["**/*.js", "**/*.ts", "**/*.vue", "**/*.json"]
+}

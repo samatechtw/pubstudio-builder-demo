@@ -1,0 +1,85 @@
+name: PR Merge (main)
+
+on:
+  push:
+    branches: [main]
+
+env:
+  WORKSPACE_ROOT: .
+  ENVIRONMENT: stg
+
+# Cancel redundant workflow runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pre_job:
+    name: Run Workflow?
+    runs-on: ubuntu-22.04
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          concurrent_skipping: 'never'
+          skip_after_successful_duplicate: 'true'
+          # Changes to paths must be synced with pr-merge*.yml
+          paths: '[".github/workflows/pr-commit.yml", "apps/**", "backend/**", "libs/**", "*"]'
+          paths_ignore: '["**/README.md", "skaffold*.yaml"]'
+
+  repo-metadata:
+    name: Get repo metadata
+    runs-on: ubuntu-latest
+    outputs:
+      next_version: ${{ steps.meta.outputs.next_version }}
+      sha8: ${{ steps.meta.outputs.sha8 }}
+      repo_slug: ${{ steps.meta.outputs.repo_slug }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: meta
+        uses: ./.github/actions/repo-metadata
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-docker-builder-demo-stg:
+    needs: [pre_job, repo-metadata]
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    name: Builder Demo Staging Image
+    runs-on: ubuntu-22.04
+    env:
+      APP_NAME: builder-demo
+      BRANCH_NAME: main
+    steps:
+      - name: Checkout code into workspace directory
+        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{github.actor}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - name: Build and push staging docker image
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{env.WORKSPACE_ROOT}}
+          build-args: |
+            "LAST_COMMIT_SHA=${{needs.repo-metadata.outputs.sha8}}"
+            "RELEASE_VERSION=${{needs.repo-metadata.outputs.next_version}}"
+          push: true
+          file: ${{env.WORKSPACE_ROOT}}/apps/${{env.APP_NAME}}/Dockerfile
+          target: stg
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{needs.repo-metadata.outputs.repo_slug}}/${{env.ENVIRONMENT}}/${{env.APP_NAME}}:${{env.BRANCH_NAME}}-${{needs.repo-metadata.outputs.sha8}}-${{github.run_number}}
+            ${{needs.repo-metadata.outputs.repo_slug}}/${{env.ENVIRONMENT}}/${{env.APP_NAME}}:latest

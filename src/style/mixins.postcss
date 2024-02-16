@@ -1,0 +1,50 @@
+$grey-500: #a1a1aa;
+$dark-blue-900: #070028;
+$purple-button: #6a5cf5;
+
+$border1: #dddfe2;
+$color-title: $dark-blue-900;
+
+$header-height: 54px;
+$header-height-mobile: 56px;
+$style-toolbar-height: 36px;
+$view-height: calc(100vh - $style-toolbar-height - 4px);
+$select-menu-width: 340px;
+
+$font-title: 'Montserrat', Helvetica, sans-serif;
+$font-text: 'Plex', Garamond, serif;
+
+@define-mixin flex-row {
+  display: flex;
+}
+
+@define-mixin flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+@define-mixin flex-center {
+  @mixin flex-row;
+  justify-content: center;
+  align-items: center;
+}
+
+@define-mixin menu {
+  @mixin flex-col;
+  color: $color-title;
+  height: 100%;
+  max-width: $select-menu-width;
+  width: $select-menu-width;
+  padding-bottom: 16px;
+  background-color: white;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+@define-mixin title-medium $size {
+  font-family: $font-title;
+  font-weight: 500;
+  font-size: $size;
+  letter-spacing: 0.02em;
+  line-height: 140%;
+}
