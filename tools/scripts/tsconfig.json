@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.tools.json",
+  "files": [],
+  "include": ["**/*.ts"],
+  "compilerOptions": {
+    "rootDir": "../../",
+    "types": ["node"],
+    "lib": ["es2022", "dom"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "es2022"
+  }
+}
