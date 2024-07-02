@@ -1,20 +1,23 @@
 <template>
-  <Suspense>
-    <ExamplePreview v-if="showPreview" @close="showPreview = false" />
-    <ExampleBuilder v-else @showPreview="showPreview = true" />
+  <div v-if="!route.matched.length"></div>
+  <router-view
+    v-else-if="route.path.startsWith('/preview')"
+    class="preview-router-view"
+  />
+  <Suspense v-else>
+    <router-view />
   </Suspense>
-
   <AppHUD />
+  <AppToast />
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { AppHUD } from '@pubstudio/builder'
-import ExamplePreview from './components/ExamplePreview.vue'
-import ExampleBuilder from './components/ExampleBuilder.vue'
+import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { AppHUD, AppToast } from '@pubstudio/builder'
 import '@pubstudio/builder/dist/style.css'
 
-const showPreview = ref()
+const route = useRoute()
 
 onMounted(async () => {
   // App mounted
@@ -24,6 +27,7 @@ onMounted(async () => {
 <style lang="postcss">
 @import './style/mixins.postcss';
 @import './style/fonts.postcss';
+@import '../node_modules/@pubstudio/builder/dist/assets/css/components/app.postcss';
 
 #app {
   height: 100%;

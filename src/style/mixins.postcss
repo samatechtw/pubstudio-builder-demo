@@ -4,6 +4,7 @@ $purple-button: #6a5cf5;
 
 $border1: #dddfe2;
 $color-title: $dark-blue-900;
+$color-red: #b7436a;
 
 $header-height: 54px;
 $header-height-mobile: 56px;
@@ -11,8 +12,8 @@ $style-toolbar-height: 36px;
 $view-height: calc(100vh - $style-toolbar-height - 4px);
 $select-menu-width: 340px;
 
-$font-title: 'Montserrat', Helvetica, sans-serif;
-$font-text: 'Plex', Garamond, serif;
+$font-title: 'Mulish', Helvetica, sans-serif;
+$font-text: 'Mulish', Helvetica, sans-serif;
 
 @define-mixin flex-row {
   display: flex;
@@ -39,6 +40,13 @@ $font-text: 'Plex', Garamond, serif;
   background-color: white;
   align-items: center;
   flex-shrink: 0;
+}
+
+@define-mixin title-semibold $size {
+  font-family: $font-title;
+  font-weight: 600;
+  font-size: $size;
+  letter-spacing: 1px;
 }
 
 @define-mixin title-medium $size {

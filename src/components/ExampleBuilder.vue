@@ -1,7 +1,7 @@
 <template>
   <div v-if="site" class="build-wrap">
     <div class="style-toolbar-wrap">
-      <StyleToolbar />
+      <SiteToolbar @showSiteSettings="showSiteSettings" />
     </div>
     <div class="build">
       <BuildMenu
@@ -67,6 +67,11 @@
         :showSupport="false"
         @cancel="showSiteErrorModal = false"
       />
+      <SiteSettingsModal
+        :site="siteMetadata"
+        :isScratch="siteId === 'scratch'"
+        @cancel="siteMetadata = undefined"
+      />
     </div>
     <SiteSaveErrorModal />
   </div>
@@ -76,8 +81,13 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'petite-vue-i18n'
 import {
+  setConfig,
   store,
+  rootSiteApi,
+  ISiteMetadata,
+  useSiteApi,
   useSiteSource,
+  useSiteVersion,
   initializeSiteStore,
   AlertModal,
   SiteErrorModal,
@@ -91,30 +101,45 @@ import {
   toggleEditorMenu,
   PageMenu,
   useBuild,
-  useHistory,
   useDragDropData,
-  StyleToolbar,
+  SiteToolbar,
   useBuildEvent,
-  hotkeysDisabled,
-  Keys,
   EditorMode,
-  useKeyListener,
 } from '@pubstudio/builder'
-import { SITE_API_URL, SITE_ID } from '../api'
+import { SITE_API_URL, SITE_ID, AUTH_BYPASS_TOKEN, SITE_FORMAT_VERSION } from '../api'
+import SiteSettingsModal from './SiteSettingsModal.vue'
+
+setConfig({ siteFormatVersion: SITE_FORMAT_VERSION })
 
 const { t } = useI18n()
 
 const { site, editor, siteError } = useBuild()
 const showSiteErrorModal = ref(true)
+const siteMetadata = ref<ISiteMetadata>()
 const { droppedFile } = useDragDropData()
 
 const siteId = SITE_ID || 'scratch'
-const { siteStore, apiSiteId, isSaving } = useSiteSource()
-await initializeSiteStore({ siteId, siteApiUrl: SITE_API_URL })
+const token = ref(AUTH_BYPASS_TOKEN)
+const serverAddress = await initializeSiteStore({
+  siteId,
+  siteApiUrl: SITE_API_URL,
+  authBypassToken: token,
+  userToken: token,
+})
+rootSiteApi.baseUrl = serverAddress ? `${serverAddress}/` : ''
+rootSiteApi.siteId.value = siteId
+
+const { siteStore, apiSite, apiSiteId, isSaving } = useSiteSource()
 useBuildEvent()
-const { undo, redo } = useHistory()
 
 const showCreateModal = ref(false)
+
+const showSiteSettings = async () => {
+  const { getSiteMetadata } = useSiteApi(apiSite)
+  if (apiSiteId.value) {
+    siteMetadata.value = await getSiteMetadata(apiSiteId.value)
+  }
+}
 
 watch(droppedFile, (newVal) => {
   if (newVal) {
@@ -158,23 +183,6 @@ const showComponentMenu = computed(() => {
   )
 })
 
-useKeyListener(
-  Keys.Z,
-  (evt: KeyboardEvent) => {
-    evt.stopImmediatePropagation()
-    if (hotkeysDisabled(evt, editor.value)) {
-      return
-    }
-    const isZ = evt.key === 'Z' || evt.key === 'z'
-    if (isZ && (evt.ctrlKey || evt.metaKey) && evt.shiftKey) {
-      redo(true)
-    } else if (isZ && (evt.ctrlKey || evt.metaKey)) {
-      undo(true)
-    }
-  },
-  'keydown',
-)
-
 const beforeWindowUnload = (e: BeforeUnloadEvent) => {
   if (isSaving.value) {
     e.preventDefault()
@@ -187,8 +195,9 @@ const beforeWindowUnload = (e: BeforeUnloadEvent) => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener('beforeunload', beforeWindowUnload)
+  await useSiteVersion({ siteId }).listVersions()
 })
 onBeforeUnmount(() => {
   window.removeEventListener('beforeunload', beforeWindowUnload)

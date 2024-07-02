@@ -3,12 +3,12 @@ import { createApp, h } from 'vue'
 import { rootApi } from './api'
 import App from './App.vue'
 import i18n from './i18n'
+import router from './router'
 
 const app = createApp(App)
 
 app.provide(ApiInjectionKey, rootApi)
 app.provide(StoreInjectionKey, store)
-app.component('router-link', h(''))
+app.use(router).use(i18n)
 
-app.use(i18n)
 app.mount('#app')

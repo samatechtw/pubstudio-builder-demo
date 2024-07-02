@@ -2,18 +2,22 @@
 
 A very simple integration of `@pubstudio/editor`, `@pubstudio/renderer` that relies on `pubstudio-site-api` for site persistence.
 
-#### Prerequisites
+### Prerequisites
 
 - Install [PNPM](https://pnpm.io/)
 
-#### Setup
+### Setup
 
 ```bash
 # Install packages
 pnpm i
 ```
 
-## Run
+### Run Site API
+
+Follow the instructions [here](https://github.com/samatechtw/pubstudio-builder/tree/main/backend/site-api) to run the backend.
+
+### Run
 
 ```bash
 # Dev server with hot-reloading
@@ -34,6 +38,7 @@ Configuration is provided from the environment, in development mode defaults are
 | ------------------------ | ----------------------------------------- |
 | EXEC_ENV                 | Execution environment: dev, ci, stg, prod |
 | VITE_SITE_FORMAT_VERSION | Site data format version                  |
+| VITE_SITE_API_URL        | Site API backend URL                      |
 
 **Docker**
 
