@@ -5,32 +5,28 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "oxlint .",
+    "format:check": "prettier --check \"{**/*,*}.{ts,js,json,vue}\""
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@intlify/core-base": "^9.13.1",
+    "@intlify/core-base": "^11.0.1",
     "@pubstudio/builder": "1.2.0",
-    "petite-vue-i18n": "^9.13.1",
-    "vue": "^3.4.31",
-    "vue-router": "^4.4.0"
+    "petite-vue-i18n": "^11.0.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
   },
   "devDependencies": {
     "@samatech/postcss-basics": "^0.7.4",
-    "@typescript-eslint/eslint-plugin": "^7.14.1",
-    "@typescript-eslint/parser": "^7.14.1",
-    "@vitejs/plugin-vue": "^5.0.5",
-    "@vue/eslint-config-typescript": "^13.0.0",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-vue": "^9.26.0",
-    "stylelint": "^16.6.1",
-    "stylelint-config-standard": "^36.0.1",
-    "typescript": "^5.5.2",
-    "vite": "^5.3.2",
-    "vue-eslint-parser": "^9.4.3"
+    "@vitejs/plugin-vue": "^5.2.1",
+    "oxlint": "^0.15.8",
+    "prettier": "^3.4.2",
+    "stylelint": "^16.14.0",
+    "stylelint-config-standard": "^37.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.11"
   }
 }

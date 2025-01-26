@@ -34,7 +34,8 @@ export const packageSubset = async ({
     checkParam(fs.existsSync(subsetPath), 'Subset file not found')
     subset = (await import(subsetPath)).default
     checkParam(subset && subset[target], `Target ${target} not found in subset.config.js`)
-  } catch (_e) {
+    // eslint-disable-next-line no-unused-vars
+  } catch (e) {
     onError(`Unable to resolve subset file: ${subsetFile}`)
   }
 
@@ -45,7 +46,8 @@ export const packageSubset = async ({
 
     pkg = await import(path.resolve(packageSource), { assert: { type: 'json' } })
     pkg = pkg.default
-  } catch (_e) {
+    // eslint-disable-next-line no-unused-vars
+  } catch (e) {
     onError(`Unable to resolve source package.json: ${packageSource}`)
   }
 
@@ -72,7 +74,8 @@ export const packageSubset = async ({
     const destPath = path.resolve(packageDestination)
     fs.writeFileSync(destPath, JSON.stringify(pkg, null, 2))
     console.info(`Successfully wrote package subset to ${destPath}`)
-  } catch (_e) {
+    // eslint-disable-next-line no-unused-vars
+  } catch (e) {
     onError('Failed to write to pkgDest')
   }
 }
