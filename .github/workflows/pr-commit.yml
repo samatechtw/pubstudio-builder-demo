@@ -39,9 +39,9 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/env-setup
       - name: Check code format
-        run: npx nx format:check --base=origin/main
-      - name: Lint source code
         run: npm run format:check
+      - name: Lint source code
+        run: npm run lint
 
   build-apps:
     needs: pre_job

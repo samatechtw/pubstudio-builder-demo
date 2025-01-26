@@ -60,6 +60,7 @@
   "site": "Site",
   "skip": "Skip",
   "source": "Source",
+  "state": "State",
   "status": "Status",
   "subdomain": "Subdomain",
   "submit": "Submit",
