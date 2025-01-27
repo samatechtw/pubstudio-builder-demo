@@ -1,36 +1,25 @@
-import { scrollTop } from '@pubstudio/builder'
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, scrollTop } from '@pubstudio/builder'
 import i18n from './i18n'
 import NotFoundPage from './components/NotFoundPage.vue'
 
 const { t } = i18n.global
 
-declare module 'vue-router' {
-  interface RouteMeta {
-    title?: string
-    noScroll?: boolean
-    scrollAnchor?: string
-  }
-}
-
 const router = createRouter({
-  history: createWebHistory(),
   scrollBehavior(to, from, savedPosition) {
-    if (to.hash) {
-      if (from.fullPath === to.fullPath) {
+    if (to?.hash) {
+      if (from?.resolvedPath === to?.resolvedPath) {
         return { el: to.hash, behavior: 'smooth' }
       }
       return new Promise((resolve, _reject) => {
         setTimeout(() => {
-          // Returning `el` or `to.hash` to vue-router doesn't work when the
-          // page is reloaded
+          // Returning `el` or `to.hash` doesn't work when the page is reloaded
           const el = document.getElementById(to.hash.slice(1))
           el?.scrollIntoView()
           resolve({})
         }, 300)
       })
     }
-    if (to.meta.scrollAnchor) {
+    if (to?.meta?.scrollAnchor) {
       const el = document.getElementById(to.meta.scrollAnchor)
       el?.scrollIntoView()
       return { top: 0 }
@@ -41,7 +30,7 @@ const router = createRouter({
       }
       return savedPosition
     }
-    if (to.meta.noScroll && from.meta.noScroll) {
+    if (to?.meta?.noScroll && from?.meta?.noScroll) {
       return {}
     }
     scrollTop()
@@ -72,10 +61,10 @@ const router = createRouter({
 
 router.afterEach((to, _from) => {
   // Document title will be updated using `@unhead/vue` according to the active page in Preview Page.
-  if (!to.path.startsWith('/preview')) {
-    const parent = to.matched.find((record) => record.meta.title)
-    const parentTitle = parent ? parent.meta.title : null
-    document.title = to.meta.title || parentTitle || 'Pub Studio'
+  if (!to?.path.startsWith('/preview')) {
+    const parent = to?.matchedParentRoutes.find((record) => record.meta?.title)
+    const parentTitle = parent?.meta?.title
+    document.title = to?.meta?.title || parentTitle || 'Pub Studio'
   }
 })
 
