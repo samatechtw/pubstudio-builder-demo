@@ -8,17 +8,23 @@
     <div class="modal-title">
       {{ t('sites.settings') }}
     </div>
-    <div class="modal-text">
-      {{ t('sites.settings_text2') }}
+    <div class="ps-tabs site-settings-tabs">
+      <div
+        v-for="tab in SiteSettingsTab"
+        :key="tab"
+        :class="['ps-tab', `ps-tab-${tab}`, activeTab === tab && 'ps-tab-active']"
+        @click="activeTab = tab"
+      >
+        {{ t(tab) }}
+      </div>
     </div>
-
-    <div class="site-update-wrap">
+    <div v-if="activeTab === SiteSettingsTab.Info" class="site-update-wrap">
       <div class="site-fields">
         <div class="site-name-wrap">
           <div class="site-label">
             {{ t('name') }}
           </div>
-          <PSInput
+          <STInput
             :modelValue="newName"
             name="site-name"
             class="site-name"
@@ -31,7 +37,7 @@
           <div class="site-label">
             {{ t('id') }}
           </div>
-          <PSInput
+          <STInput
             :modelValue="newNamespace"
             name="site-id"
             class="site-id"
@@ -59,23 +65,26 @@
           :text="t('sites.delete_draft')"
           @click="emit('deleteDraft')"
         />
+        <PSButton
+          class="save-button"
+          size="small"
+          :animate="updating"
+          :text="t('save')"
+          @click="updateSite"
+        />
       </div>
     </div>
-    <CustomDomains
-      v-if="!isScratch"
-      :initialDomains="site.custom_domains"
-      @updateDomains="newDomains = $event"
+    <SiteSettingsDomains
+      v-else-if="activeTab === SiteSettingsTab.Domains"
+      :site="site"
+      @updateDomains="updateDomains"
+      @cancel="emit('cancel')"
     />
-    <div class="site-settings-actions">
-      <PSButton
-        class="update-button"
-        :text="t('update')"
-        :animate="updating"
-        :disabled="isEditingDomain"
-        @click="updateSite"
-      />
-      <PSButton class="cancel-button" :text="t('cancel')" @click="emit('cancel')" />
-    </div>
+    <SiteSettingsUsage
+      v-else-if="activeTab === SiteSettingsTab.Usage"
+      :site="site"
+      @cancel="emit('cancel')"
+    />
   </Modal>
 </template>
 
@@ -83,29 +92,33 @@
 import { computed, onMounted, ref, toRefs, watch } from 'vue'
 import { useI18n } from 'petite-vue-i18n'
 import {
-  arrayChanged,
   Modal,
   PSButton,
-  PSInput,
   PSToggle,
   ISiteMetadata,
   IUpdateSiteApiRequest,
   useSiteVersion,
-  CustomDomains,
   replaceNamespace,
   useBuild,
-  useEditDomains,
-  useSiteApi,
+  ICustomDomainRelationViewModel,
   useSiteSource,
   useSites,
 } from '@pubstudio/builder'
+import { STInput } from '@samatech/vue-components'
+import SiteSettingsDomains from './SiteSettingsDomains.vue'
+import SiteSettingsUsage from './SiteSettingsUsage.vue'
+
+enum SiteSettingsTab {
+  Info = 'info',
+  Domains = 'domains',
+  Usage = 'usage',
+}
 
 const { t } = useI18n()
 const { hasDraft, sitePublished, listVersions } = useSiteVersion()
 const { siteStore, apiSite } = useSiteSource()
 const { site: activeSite, replaceSite } = useBuild()
-const { isEditingDomain } = useEditDomains()
-const { updateSiteMetadata } = useSiteApi(apiSite)
+const activeTab = ref(SiteSettingsTab.Info)
 const {
   updateSite: updateSiteApi,
   publishSite: publishSiteApi,
@@ -113,7 +126,6 @@ const {
   validateSiteName,
   validateNamespace,
 } = useSites()
-const newDomains = ref<string[] | undefined>()
 const newName = ref()
 const newNamespace = ref()
 const published = ref(false)
@@ -158,6 +170,12 @@ const setPublished = async (publish: boolean) => {
   }
 }
 
+const updateDomains = (domains: ICustomDomainRelationViewModel[]) => {
+  if (activeSite.value) {
+    activeSite.value.custom_domains = domains
+  }
+}
+
 const updateSite = async () => {
   if (site.value && !siteNameError.value && !namespaceError.value) {
     const { id } = site.value
@@ -172,10 +190,6 @@ const updateSite = async () => {
     if (!isScratch.value && newNamespace.value !== activeSite.value.context.namespace) {
       replaceSite(replaceNamespace(activeSite.value, newNamespace.value))
     }
-    // Update domains if changed
-    if (arrayChanged(site.value.custom_domains, newDomains.value)) {
-      await updateSiteMetadata(id, { domains: newDomains.value })
-    }
     if (!error.value) {
       emit('cancel')
     }
@@ -186,7 +200,6 @@ const updateSite = async () => {
 
 const initializeSite = () => {
   published.value = sitePublished.value
-  newDomains.value = [...(site.value?.custom_domains ?? [])]
   newNamespace.value = activeSite.value?.context.namespace ?? ''
   newName.value = activeSite.value?.name
 }
@@ -241,6 +254,9 @@ onMounted(async () => {
     &:focus {
       background-color: rgba($color-red, 0.8);
     }
+  }
+  .save-button {
+    margin-top: 16px;
   }
   .site-fields {
     @mixin flex-col;

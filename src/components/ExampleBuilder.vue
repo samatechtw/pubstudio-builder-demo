@@ -63,7 +63,6 @@
       <SiteErrorModal
         :show="!!siteError && siteError !== 'errors.Unauthorized' && showSiteErrorModal"
         :siteId="apiSiteId ?? ''"
-        :siteError="siteError ?? ''"
         :showSupport="false"
         @cancel="showSiteErrorModal = false"
       />

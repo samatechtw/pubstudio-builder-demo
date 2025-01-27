@@ -42,6 +42,13 @@ $font-text: 'Mulish', Helvetica, sans-serif;
   flex-shrink: 0;
 }
 
+@define-mixin title $size {
+  font-family: $font-title;
+  font-weight: 600;
+  font-size: $size;
+  letter-spacing: 1px;
+}
+
 @define-mixin title-semibold $size {
   font-family: $font-title;
   font-weight: 600;

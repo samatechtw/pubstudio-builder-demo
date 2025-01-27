@@ -1,21 +1,15 @@
 <template>
-  <div v-if="!route.matched.length"></div>
-  <router-view
-    v-else-if="route.path.startsWith('/preview')"
-    class="preview-router-view"
-  />
+  <router-view v-if="route?.path.startsWith('/preview')" class="preview-router-view" />
   <Suspense v-else>
     <router-view />
   </Suspense>
-  <AppHUD />
   <AppToast />
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { AppHUD, AppToast } from '@pubstudio/builder'
-import '@pubstudio/builder/dist/style.css'
+import { AppToast, useRoute } from '@pubstudio/builder'
+import '@pubstudio/builder/dist/builder.css'
 
 const route = useRoute()
 
